@@ -1,0 +1,65 @@
+﻿<UserControl x:Name="EntityFrameControl"
+    x:Class="EvendlerEditor.EntityFrame"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:EvendlerEditor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="200" >
+    <UserControl.Background>
+        <AcrylicBrush TintColor="#19FFFFFF"/>
+    </UserControl.Background>
+    <UserControl.Shadow>
+        <ThemeShadow />
+    </UserControl.Shadow>
+    <Grid x:Name="C_MAINGRID" 
+        PointerEntered="EntityFrameControl_PointerEntered" 
+        PointerMoved="EntityFrameControl_PointerMoved" 
+        PointerPressed="EntityFrameControl_PointerPressed"
+        PointerReleased="EntityFrameControl_PointerReleased" 
+        PointerExited="EntityFrameControl_PointerExited"
+        CornerRadius="8,8,8,8" Margin="4,4,4,4" BorderThickness="2,2,2,2" 
+          >
+        <Grid.Background>
+            <AcrylicBrush TintColor="Transparent"/>
+        </Grid.Background>
+        <Grid.BorderBrush>
+            <AcrylicBrush TintColor="#66000000"/>
+        </Grid.BorderBrush>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+
+            <RowDefinition x:Name="C_A_ROWHEIGTH1" Height="64*"/>
+            <RowDefinition x:Name="C_A_ROWHEIGTH2" Height="64*"/>
+
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="48"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="48"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel  x:Name="C_MAINSTACKVIEW" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0"
+
+                     Margin="0,4,0,4" VerticalAlignment="Center" HorizontalAlignment="Stretch" CornerRadius="4,4,4,4" MinWidth="80" FocusVisualPrimaryBrush="{x:Null}" Orientation="Vertical"
+        >
+            <TextBlock x:Name="C_LABEL" Text="Main" TextWrapping="Wrap" TextAlignment="Center" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" FocusVisualPrimaryBrush="{x:Null}" LineStackingStrategy="BlockLineHeight"/>
+        </StackPanel>
+        <StackPanel x:Name="C_INPUTSTACK"  Grid.Row="1" FocusVisualPrimaryBrush="#FFF60000" Grid.ColumnSpan="2" Margin="0,4,4,4" CornerRadius="4,4,4,4"/>
+        <StackPanel x:Name="C_OUTPUTSTACK" Grid.Row="1" FocusVisualPrimaryBrush="#FFF60000" Grid.Column="2" Grid.ColumnSpan="2" Margin="4,4,0,4" CornerRadius="4,4,4,4"/>
+        <AppBarButton x:Name="C_BUTTONEDIT" HorizontalAlignment="Center" Icon="Edit" Label="" Grid.Row="0" VerticalAlignment="Center" RenderTransformOrigin="0.536,0.559" Width="40" Height="40" Click="C_BUTTONEDIT_Click" Margin="4,4,4,4" FontSize="6" ClickMode="Press" CornerRadius="4,4,4,4"/>
+        <AppBarButton x:Name="C_BUTTONDELETE" HorizontalAlignment="Center" Icon="Clear" Label="" VerticalAlignment="Center" RenderTransformOrigin="0.536,0.559" Width="40" Height="40" Grid.Column="3" Click="C_BUTTONDELETE_Click" Margin="4,4,4,4" Background="Red" CornerRadius="4,4,4,4"/>
+
+        <StackPanel x:Name="C_PARAMNAMESTACK" Grid.Row="2" FocusVisualPrimaryBrush="#FFF60000" Grid.ColumnSpan="2" Margin="4,4,4,4" CornerRadius="4,4,4,4"/>
+        <StackPanel x:Name="C_PARAMSTACK" Grid.Row="2" FocusVisualPrimaryBrush="#FFF60000" Grid.Column="2" Grid.ColumnSpan="2" Margin="4,4,4,4" CornerRadius="4,4,4,4"/>
+        <TextBox x:Name="C_CODEBOX" Grid.Row="1" Grid.ColumnSpan="4" 
+                 Grid.RowSpan="3" Background="White" Visibility="Collapsed"
+                 Margin="4,4,4,4" InputScope="Default"
+                 AcceptsReturn="True" Text=""
+                 Canvas.ZIndex="2" BorderThickness="0,0,0,0" CornerRadius="4,4,4,4"
+        ></TextBox>
+    </Grid>
+</UserControl>
