@@ -114,14 +114,7 @@ namespace EvendlerEditor
         private void C_BUTTONEDIT_Click(object sender, RoutedEventArgs e)
         {
             if(m_EditEnabled)
-            {
-                dynamic d = new System.Dynamic.ExpandoObject();
-                d.ENTITYNAME = m_Name;
-                if (e_RefreshFrame != null)
-                {
-                    e_RefreshFrame.Invoke(this, d);
-
-                }
+            {                                
                 C_CODEBOX.Visibility = Visibility.Collapsed;
                 C_BUTTONEDIT.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(240, 240, 240, 240));
                 Decode_Talker();
@@ -222,15 +215,22 @@ namespace EvendlerEditor
         }
         public void Decode_Talker()
         {
+            dynamic d = new System.Dynamic.ExpandoObject();
+            d.ENTITYNAME = m_Name;
+            if (e_RefreshFrame != null)
+            {
+                e_RefreshFrame.Invoke(this, d);
 
-           String code= C_CODEBOX.Text;
-           m_MetaText = code;
-           int i= code.IndexOf("\r");
+            }
+
+            String code= C_CODEBOX.Text;
+            m_MetaText = code;
+            int i= code.IndexOf("\r");
 
             m_InputSlot.Clear();
             m_OutputSlot.Clear();
             m_ParamsName.Clear();
-           while (i>0)
+           while (i>=0)
             {
 
 
@@ -276,6 +276,10 @@ namespace EvendlerEditor
                     Margin = new Thickness(4),
                     CornerRadius = new CornerRadius(8)
                 };
+                if (str.Contains("#"))
+                {
+                    button.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 128, 128));
+                }
                 button.Click += this.OnSlotButtonClicked;
                 C_INPUTSTACK.Children.Add(button);
 

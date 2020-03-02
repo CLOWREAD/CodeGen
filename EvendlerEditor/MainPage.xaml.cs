@@ -21,15 +21,22 @@ namespace EvendlerEditor
     /// <summary>
     /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
+    public class PresetItem
+    {
+        public   String Label="";
+        public String Code="";
+    }
     public sealed partial class MainPage : Page
     {
+        public System.Collections.Generic.List<PresetItem> m_Presets = new System.Collections.Generic.List<PresetItem>();
         EntityElements m_Elements = new EntityElements();
         public EntityLine_Model m_TempLine = new EntityLine_Model() { from_Name=null,to_Name=null};
         public MainPage()
         {
             this.InitializeComponent();
-
-
+            m_Presets.Add(new PresetItem() { Label = "EMPTY",Code="" });
+            C_PRESETLIST.ItemsSource = m_Presets;
+            Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
         }
 
         private void EntityFrame_SoltEventHandler(object sender, dynamic e)
@@ -149,15 +156,20 @@ namespace EvendlerEditor
         public void OnEntityDeleteClicked(object sender, dynamic e)
         {
             String e_name = e.ENTITYNAME;
+            DeleteFrame(e_name);
+        }
+        public void DeleteFrame(String Name)
+        {
+            String e_name = Name;
             var entity = (EntityFrame_Model)m_Elements.m_Frames[e_name];
             System.Numerics.Vector3 p = entity.UIEntity.Translation;
             var key_list = new System.Collections.ArrayList();
-            foreach(String i in entity.m_Lines.Values)
+            foreach (String i in entity.m_Lines.Values)
             {
                 key_list.Add(i);
             }
 
-            foreach (String  t_line_key in key_list)
+            foreach (String t_line_key in key_list)
             {
                 EntityLine_Model line = (EntityLine_Model)m_Elements.m_Lines[t_line_key];
                 DeleteLine(line.Name);
@@ -279,10 +291,10 @@ namespace EvendlerEditor
             t_path.StrokeThickness = 4;
             t_path.Data = pathGeometry1;
             line.UIPath = t_path;
-            m_Elements.m_Lines.Add(line.Name, line);
+            m_Elements.m_Lines[line.Name] =line;
 
-            frame_from.m_Lines.Add(from_slot_name, line.Name);
-            frame_to.m_Lines.Add(to_slot_name, line.Name);
+            frame_from.m_Lines[from_slot_name]= line.Name;
+            frame_to.m_Lines[to_slot_name]= line.Name;
             m_Elements.m_Frames[EntityLine.from_Name] = frame_from;
             m_Elements.m_Frames[EntityLine.to_Name] = frame_to;
 
@@ -294,10 +306,15 @@ namespace EvendlerEditor
 
         private EntityFrame_Model AddFrame(String EntityFrameName=null)
         {
+            
             var entity = new EntityFrame_Model();
             entity.Name = "ENTITY_" + EntityElements.RandToken();
             if(EntityFrameName != null)
             {
+                if(m_Elements.m_Frames.ContainsKey(EntityFrameName))
+                {
+                    DeleteFrame(EntityFrameName);
+                }
                 entity.Name= EntityFrameName;
             }
             entity.UIEntity = new EntityFrame();
@@ -316,13 +333,23 @@ namespace EvendlerEditor
             //entity.UIEntity.
             this.C_MAINGRID.Children.Add(entity.UIEntity);
 
-            m_Elements.m_Frames.Add(entity.Name, entity);
+            m_Elements.m_Frames[entity.Name]= entity;
             return entity;
         }
 
         private  void C_BUTTON_ADD_ENTITY_Click(object sender, RoutedEventArgs e)
         {
-           var entity=  AddFrame();
+            var entity=  AddFrame();
+            if(C_PRESETLIST.SelectedIndex!=-1)
+            {
+                String code = m_Presets[C_PRESETLIST.SelectedIndex].Code;
+                if(code!=null && !code .Equals(""))
+                {
+                    entity.UIEntity.SetCodeBox(code);
+                    entity.UIEntity.Decode_Talker();
+                }
+            }
+
         }
         public String Serialize()
         {
@@ -448,7 +475,7 @@ namespace EvendlerEditor
             picker.FileTypeFilter.Add(".json");
             // Default file name if the user does not type one in or select a file to replace
             var t_storagefile = await picker.PickSingleFileAsync();
-
+            if (t_storagefile == null) return;
             String json_str;
             using (StorageStreamTransaction transaction = await t_storagefile.OpenTransactedWriteAsync())
             {
@@ -491,6 +518,65 @@ namespace EvendlerEditor
                     await transaction.CommitAsync();
                 }
             }
+        }
+
+        private void C_BUTTON_IMPORT_ENTITY_Click(object sender, RoutedEventArgs e)
+        {
+            C_MAINGRID.Children.Clear();
+            m_Elements.m_Lines.Clear();
+            m_Elements.m_Frames.Clear();
+        }
+
+        private  async void Page_KeyDown(object sender, Windows.System.VirtualKey e)
+        {
+            if(e==Windows.System.VirtualKey.RightShift)
+            {
+                //C_MAINSPLITVIEW.IsPaneOpen = true;
+            }
+        }
+
+        private async void Page_KeyUp(object sender, Windows.System.VirtualKey e)
+        {
+            if (e == Windows.System.VirtualKey.Shift)
+            {
+              //  C_MAINSPLITVIEW.IsPaneOpen = !C_MAINSPLITVIEW.IsPaneOpen;
+            }
+        }
+
+        private async void Dispatcher_AcceleratorKeyActivated(Windows.UI.Core.CoreDispatcher sender, Windows.UI.Core.AcceleratorKeyEventArgs args)
+        {
+           if(  args.EventType.ToString().Equals("KeyDown"))
+            {
+                Page_KeyDown(sender, args.VirtualKey);
+            }
+            if (args.EventType.ToString().Equals("KeyUp"))
+            {
+                Page_KeyUp(sender, args.VirtualKey);
+                
+            }
+        }
+
+        private void C_BUTTONADDPRESET_Click(object sender, RoutedEventArgs e)
+        {
+            String code = C_TEXTADDPRESET.Text;
+            int i = code.IndexOf("\r");
+            String Label = code.Substring(0, i);
+            if (Label.Contains("@"))
+            {
+                Label = Label.Substring(1);
+            }
+            C_PRESETLIST.ItemsSource = null;
+            m_Presets.Add(new PresetItem()
+            {
+                Label = Label,
+                Code = code,
+            }) ;
+            C_PRESETLIST.ItemsSource = m_Presets;
+        }
+
+        private void C_BUTTON_PANEL_SWITCH_Click(object sender, RoutedEventArgs e)
+        {
+            C_MAINSPLITVIEW.IsPaneOpen = !C_MAINSPLITVIEW.IsPaneOpen;
         }
     }
 }
