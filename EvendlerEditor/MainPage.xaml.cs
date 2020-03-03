@@ -30,10 +30,18 @@ namespace EvendlerEditor
     {
         public System.Collections.Generic.List<PresetItem> m_Presets = new System.Collections.Generic.List<PresetItem>();
         EntityElements m_Elements = new EntityElements();
+        /// <summary>
+        /// Record Line that is not complete
+        /// </summary>
         public EntityLine_Model m_TempLine = new EntityLine_Model() { from_Name=null,to_Name=null};
         public MainPage()
         {
             this.InitializeComponent();
+            m_TempLine.UIPath = new Windows.UI.Xaml.Shapes.Path();
+            m_TempLine.UIPath.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 204, 204, 255));
+            m_TempLine.UIPath.Stroke = new SolidColorBrush(Windows.UI.Colors.Black);
+            m_TempLine.UIPath.StrokeThickness = 4;
+            C_MAINGRID.Children.Add(m_TempLine.UIPath);
             m_Presets.Add(new PresetItem() { Label = "EMPTY",Code="" });
             C_PRESETLIST.ItemsSource = m_Presets;
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
@@ -100,6 +108,7 @@ namespace EvendlerEditor
         
         private void OnEntitySlotClicked(object sender, dynamic e)
         {
+            m_TempLine.UIPath.Visibility = Visibility.Collapsed;
 
             if (m_TempLine.from_Name == null || m_TempLine.to_Name == null)
             {
@@ -577,6 +586,72 @@ namespace EvendlerEditor
         private void C_BUTTON_PANEL_SWITCH_Click(object sender, RoutedEventArgs e)
         {
             C_MAINSPLITVIEW.IsPaneOpen = !C_MAINSPLITVIEW.IsPaneOpen;
+        }
+
+        private void C_MAINGRID_PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            if(m_TempLine.to_Name==null && m_TempLine.from_Name==null)
+            {
+                m_TempLine.UIPath.Visibility = Visibility.Collapsed;
+                return;
+            }
+            m_TempLine.UIPath.Visibility = Visibility.Visible;
+            EntityLine_Model t_line = new EntityLine_Model();
+            t_line.from_index = m_TempLine.from_index;
+            t_line.to_index = m_TempLine.to_index;
+            if (m_TempLine.from_Name==null && m_TempLine.to_Name!=null)
+            {
+                var frame_to = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.to_Name];
+                t_line.from_point.X = (int)e.GetCurrentPoint(C_MAINGRID).Position.X;
+                t_line.from_point.Y = (int)e.GetCurrentPoint(C_MAINGRID).Position.Y;
+                t_line.to_point = new System.Drawing.Point((int)frame_to.UIEntity.Translation.X, (int)frame_to.UIEntity.Translation.Y);
+
+                t_line.to_point.Y += EntityFrame_Model.SlotIndexToY(t_line.to_index);
+                t_line.to_point.X += 300 * 0 + 8;
+            }
+            if (m_TempLine.to_Name == null && m_TempLine.from_Name != null)
+            {
+                var frame_from = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.from_Name];
+                t_line.to_point.X = (int)e.GetCurrentPoint(C_MAINGRID).Position.X;
+                t_line.to_point.Y = (int)e.GetCurrentPoint(C_MAINGRID).Position.Y;
+                t_line.from_point = new System.Drawing.Point((int)frame_from.UIEntity.Translation.X, (int)frame_from.UIEntity.Translation.Y);
+
+                t_line.from_point.Y += EntityFrame_Model.SlotIndexToY(t_line.from_index);
+                t_line.from_point.X += 300 * 1 - 8;
+            }
+
+            
+
+
+
+
+            var pathGeometry1 = new PathGeometry();
+            var pathFigureCollection1 = new PathFigureCollection();
+            var pathFigure1 = new PathFigure();
+            pathFigure1.IsClosed = false;
+            pathFigure1.StartPoint = new Windows.Foundation.Point(t_line.from_point.X, t_line.from_point.Y);
+            pathFigureCollection1.Add(pathFigure1);
+            pathGeometry1.Figures = pathFigureCollection1;
+
+            var pathSegmentCollection1 = new PathSegmentCollection();
+            var pathSegment1 = new BezierSegment();
+            pathSegment1.Point1 = new Point(t_line.from_point.X + 100, t_line.from_point.Y);
+            pathSegment1.Point2 = new Point(t_line.to_point.X - 100, t_line.to_point.Y);
+            pathSegment1.Point3 = new Point(t_line.to_point.X, t_line.to_point.Y);
+            pathSegmentCollection1.Add(pathSegment1);
+
+            pathFigure1.Segments = pathSegmentCollection1;
+
+            
+            m_TempLine.UIPath.Data = pathGeometry1;
+
+        }
+
+        private void C_MAINGRID_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            m_TempLine.from_Name = null;
+            m_TempLine.to_Name = null;
+            m_TempLine.UIPath.Visibility = Visibility.Collapsed;
         }
     }
 }

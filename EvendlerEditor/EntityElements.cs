@@ -94,7 +94,7 @@ namespace EvendlerEditor
             foreach(EntityFrame_Model f in m_Frames.Values)
             {
                 var t_res = f.UIEntity.m_CodeText;
-                t_res=t_res.Replace("@FUNCTION", f.UIEntity.m_Label + "_" + f.Name);
+                t_res=t_res.Replace("@FUNCTION ", f.UIEntity.m_Label + "_" + f.Name +" ");
                 for (int i=0;i< f.UIEntity.m_ParamsName.Count;i++)
                 {
                     String p_name = f.UIEntity.m_ParamsName[i];
@@ -225,6 +225,9 @@ namespace EvendlerEditor
         /// KEY: slot name ; Value: line name
         /// </summary>
         public System.Collections.Hashtable m_Lines = new System.Collections.Hashtable(); /// KEY: slot name ; Value: line name
-
+        public static int SlotIndexToY(int i)
+        {
+            return 48 + 32 + 38 * i;
+        }
     }
 }

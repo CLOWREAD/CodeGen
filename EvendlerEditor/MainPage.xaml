@@ -49,7 +49,10 @@
                       HorizontalScrollMode="Enabled"
                       >
 
-                <Canvas x:Name="C_MAINGRID"  Width="4096" Height="4096" />
+                <Canvas x:Name="C_MAINGRID" 
+                        Width="4096" Height="4096" 
+                        PointerMoved="C_MAINGRID_PointerMoved" PointerPressed="C_MAINGRID_PointerPressed" 
+                        Background="White" />
             </ScrollViewer>
         </SplitView>
         <Grid Margin="10,0,0,0" Grid.Row="0" >
