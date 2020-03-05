@@ -138,7 +138,8 @@ namespace EvendlerEditor
                     String o_name = linkedframe.Name;
                     String o_slot = GetLinkedEntitySlot(f.Name, i_name);
                     String o_label = linkedframe.UIEntity.m_Label;
-                    t_res = t_res.Replace("@" + i_name, "var "+i_name+"=((dynamic)GLOBAL_OUTPUT[\"" + o_label + "_" + o_name + "\"])."+ o_slot+";");
+                    String rep_str = String.Format(" var {0} = ((dynamic)GLOBAL_OUTPUT[\"{1}\"]).{2};", i_name,o_label + "_" + o_name, o_slot);
+                    t_res = t_res.Replace("@" + i_name, rep_str);
                     
 
 

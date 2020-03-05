@@ -41,7 +41,7 @@
                     <ListView x:Name="C_PRESETLIST" Grid.Row="1"  ItemTemplate="{StaticResource PresetListViewTemplate}" IsItemClickEnabled="True"/>
 
                     <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="14,24,0,24" >
-                        <TextBox x:Name="C_TEXTADDPRESET" Text="" Margin="4,0,4,0" VerticalAlignment="Center" MinHeight="48" MinWidth="170" MaxWidth="170" CornerRadius="4,4,4,4" AcceptsReturn="True"/>
+                        <TextBox x:Name="C_TEXTADDPRESET" Text="" Margin="4,0,4,0" VerticalAlignment="Center" MinHeight="48" MaxHeight="64" MinWidth="170" MaxWidth="170" CornerRadius="4,4,4,4" AcceptsReturn="True"/>
                         <Button  Content="ADD" x:Name="C_BUTTONADDPRESET" Click="C_BUTTONADDPRESET_Click" MinHeight="48" MinWidth="36" CornerRadius="4,4,4,4" />
                        
                     </StackPanel>

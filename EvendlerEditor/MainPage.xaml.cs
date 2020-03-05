@@ -170,7 +170,7 @@ namespace EvendlerEditor
                     m_TempLine.to_index = e.SLOT;
                     m_TempLine.to_SlotName = e.SLOTNAME;
                     var frame_to = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.to_Name];
-                    string to_slot_name = m_TempLine.from_SlotName;//frame_to.UIEntity.m_InputSlot[m_TempLine.to_index];
+                    string to_slot_name = m_TempLine.to_SlotName;//frame_to.UIEntity.m_InputSlot[m_TempLine.to_index];
 
                     //if this slot is linked with a line ,delete it
                     if (frame_to.m_Lines.Contains(to_slot_name))
@@ -283,16 +283,16 @@ namespace EvendlerEditor
             string from_slot_name = frame_from.UIEntity.m_OutputSlot[EntityLine.from_index];
             string to_slot_name = frame_to.UIEntity.m_InputSlot[EntityLine.to_index];
 
-            ///// DELETE Existing Line
+            //TODO:/// DELETE Existing Line
             if (frame_from.m_Lines.Contains(from_slot_name))
             {
-                var from_line = (EntityLine_Model)frame_from.m_Lines[from_slot_name];
-                DeleteLine(from_line.Name);
+                var from_line_name = (String)frame_from.m_Lines[from_slot_name];
+                DeleteLine(from_line_name);
             }
             if (frame_to.m_Lines.Contains(to_slot_name))
             {
-                var to_line = (EntityLine_Model)frame_to.m_Lines[to_slot_name];
-                DeleteLine(to_line.Name);
+                var to_line_name = (String)frame_to.m_Lines[to_slot_name];
+                DeleteLine(to_line_name);
             }
             ////// Refresh Frame
             frame_from = (EntityFrame_Model)m_Elements.m_Frames[EntityLine.from_Name];
