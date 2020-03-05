@@ -6,9 +6,13 @@
 输出的值保存在Dictionary中。然后根据返回的方法名字调用接下来的方法，直到返回的方法名字为空。
 # 界面
 
+![UI](https://raw.githubusercontent.com/CLOWREAD/CodeGen/master/SharedScreenshot.jpg)
 
 # 生成代码示例
+
 生成的代码如下：
+
+
       public void APIMain (dynamic param)
       {
                   System.Collections.Generic.Dictionary<String, Object> result = new Dictionary<string, object>();
