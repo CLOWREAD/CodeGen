@@ -21,14 +21,47 @@ namespace EvendlerEditor
     /// <summary>
     /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
-    public class PresetItem
+    public class PresetItem :IComparable, IEqualityComparer<PresetItem>
     {
-        public   String Label="";
+        public String Label="";
         public String Code="";
+
+   
+
+        public int CompareTo(object obj)
+        {
+            PresetItem o = (PresetItem)obj;
+            if(o.Code.Equals(this.Code) && o.Label.Equals(this.Label))
+            {
+                return 0;
+            }
+            else
+            {
+                return this.Code.CompareTo(o.Code);
+            }
+
+        }
+
+        public bool Equals(PresetItem x, PresetItem y)
+        {
+            if (x.Code.Equals(y.Code) && x.Label.Equals(y.Label))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public int GetHashCode(PresetItem obj)
+        {
+            return this.Code.GetHashCode();
+        }
     }
     public sealed partial class MainPage : Page
     {
         public System.Collections.Generic.List<PresetItem> m_Presets = new System.Collections.Generic.List<PresetItem>();
+        /// <summary>
+        ///  Record Lines and Frames dictionary
+        /// </summary>
         EntityElements m_Elements = new EntityElements();
         /// <summary>
         /// Record Line that is not complete
@@ -47,7 +80,7 @@ namespace EvendlerEditor
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
         }
 
-        private void EntityFrame_SoltEventHandler(object sender, dynamic e)
+        private void EntityFrame_FrameMove(object sender, dynamic e)
         {
 
             String e_name= e.ENTITYNAME;
@@ -61,14 +94,14 @@ namespace EvendlerEditor
                 {
                     line.from_point.X = (int)p.X;
                     line.from_point.Y = (int)p.Y;
-                    line.from_point.Y += 48 + 32 + 38 * line.from_index;
+                    line.from_point.Y += EntityFrame_Model.SlotIndexToY(line.from_index);
                     line.from_point.X += 300 * 1-8;
                 }
                 if (line.to_Name.Equals(entity.Name))
                 {
                     line.to_point.X = (int)p.X;
                     line.to_point.Y = (int)p.Y;
-                    line.to_point.Y += 48 + 32 + 38 * line.to_index;
+                    line.to_point.Y += EntityFrame_Model.SlotIndexToY(line.to_index);
                     line.to_point.X += 300 * 0+8;
                 }
 
@@ -117,11 +150,13 @@ namespace EvendlerEditor
                 {
                     m_TempLine.from_Name = e.ENTITYNAME;
                     m_TempLine.from_index = e.SLOT;
+                    m_TempLine.from_SlotName = e.SLOTNAME;
                     var frame_from = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.from_Name];
-                    //var frame_to = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.to_Name];
 
-                    string from_slot_name = frame_from.UIEntity.m_OutputSlot[m_TempLine.from_index];
-                    //string to_slot_name = frame_to.UIEntity.m_InputSlot[m_TempLine.to_index];
+                    string from_slot_name = m_TempLine.from_SlotName;//frame_from.UIEntity.m_OutputSlot[m_TempLine.from_index];
+                    
+
+                    //if this slot is linked with a line ,delete it
                     if (frame_from.m_Lines.Contains(from_slot_name))
                     {
                         var from_line_name = (String)frame_from.m_Lines[from_slot_name];
@@ -133,14 +168,13 @@ namespace EvendlerEditor
                 {
                     m_TempLine.to_Name = e.ENTITYNAME;
                     m_TempLine.to_index = e.SLOT;
-                    //var frame_from = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.from_Name];
+                    m_TempLine.to_SlotName = e.SLOTNAME;
                     var frame_to = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.to_Name];
+                    string to_slot_name = m_TempLine.from_SlotName;//frame_to.UIEntity.m_InputSlot[m_TempLine.to_index];
 
-                    //string from_slot_name = frame_from.UIEntity.m_OutputSlot[m_TempLine.from_index];
-                    string to_slot_name = frame_to.UIEntity.m_InputSlot[m_TempLine.to_index];
+                    //if this slot is linked with a line ,delete it
                     if (frame_to.m_Lines.Contains(to_slot_name))
-                    {
-                       
+                    {                       
                         var to_line_name = (String)frame_to.m_Lines[to_slot_name];
                         var to_line = (EntityLine_Model)m_Elements.m_Lines[to_line_name];
                         DeleteLine(to_line.Name);
@@ -155,8 +189,7 @@ namespace EvendlerEditor
             {
 
                 AddLine(m_TempLine);
-
-
+                // clear m_Templeteline
                 m_TempLine.to_Name = null;
                 m_TempLine.from_Name = null;
             }
@@ -216,15 +249,25 @@ namespace EvendlerEditor
             //this.C_MAINGRID.Children.Remove(entity.UIEntity);
             //m_Elements.m_Frames.Remove(entity.Name);
         }
+        /// <summary>
+        /// Delete  A Specific Line
+        /// </summary>
+        /// <param name="name"> Line's name</param>
+        /// 
+
         private void DeleteLine(String name)
         {
             var line= (EntityLine_Model)m_Elements.m_Lines[name];
+            ///
+
             if (line == null) return;
 
             var frame_from = (EntityFrame_Model)m_Elements.m_Frames[line.from_Name];
             var frame_to = (EntityFrame_Model)  m_Elements.m_Frames[line.to_Name];
             string from_slot_name = frame_from.UIEntity.m_OutputSlot[line.from_index];
             string to_slot_name = frame_to.UIEntity.m_InputSlot[line.to_index];
+            
+
             frame_from.m_Lines.Remove(from_slot_name);
             frame_to.m_Lines.Remove(to_slot_name);
             m_Elements.m_Frames[line.from_Name]= frame_from;
@@ -270,8 +313,8 @@ namespace EvendlerEditor
             line.to_point = new System.Drawing.Point((int)frame_to.UIEntity.Translation.X, (int)frame_to.UIEntity.Translation.Y);
             line.from_index = EntityLine.from_index;
             line.to_index = EntityLine.to_index;
-            line.from_point.Y += 48 + 32 + 38 * line.from_index;
-            line.to_point.Y += 48 + 32 + 38 * line.to_index;
+            line.from_point.Y += EntityFrame_Model.SlotIndexToY(line.from_index);
+            line.to_point.Y += EntityFrame_Model.SlotIndexToY(line.to_index);
             line.from_point.X += 300 * 1 - 8;
             line.to_point.X += 300 * 0 + 8;
             Windows.UI.Xaml.Shapes.Path t_path = new Windows.UI.Xaml.Shapes.Path();
@@ -332,9 +375,9 @@ namespace EvendlerEditor
             entity.UIEntity.Translation = new System.Numerics.Vector3(0, 0, 0);
 
             entity.UIEntity.m_Name = entity.Name;
-            entity.UIEntity.SlotClicked += this.OnEntitySlotClicked;
-            entity.UIEntity.EntityMoved += this.EntityFrame_SoltEventHandler;
-            entity.UIEntity.Deletelicked += this.OnEntityDeleteClicked;
+            entity.UIEntity.e_SlotClicked += this.OnEntitySlotClicked;
+            entity.UIEntity.e_EntityMoved += this.EntityFrame_FrameMove;
+            entity.UIEntity.e_Deletelicked += this.OnEntityDeleteClicked;
             entity.UIEntity.e_RefreshFrame += this.OnEntityRefresh;
             //entity.UIEntity.e_PointerExit += this.OnEntityPointerExit;
             //entity.UIEntity.e_PointerEnter += this.OnEntityPointerEnter;
@@ -583,75 +626,23 @@ namespace EvendlerEditor
             C_PRESETLIST.ItemsSource = m_Presets;
         }
 
-        private void C_BUTTON_PANEL_SWITCH_Click(object sender, RoutedEventArgs e)
+        private void C_PRESETLIST_BUTTON_DELETE_Click(object sender, RoutedEventArgs e)
         {
-            C_MAINSPLITVIEW.IsPaneOpen = !C_MAINSPLITVIEW.IsPaneOpen;
+            Button button=(Button)sender;
+            PresetItem pi= (PresetItem)button.DataContext;
+            C_PRESETLIST.ItemsSource = null;
+            m_Presets.Remove(pi);
+            C_PRESETLIST.ItemsSource = m_Presets;
         }
 
-        private void C_MAINGRID_PointerMoved(object sender, PointerRoutedEventArgs e)
+        private async void C_BUTTONLOADPRESET_Click(object sender, RoutedEventArgs e)
         {
-            if(m_TempLine.to_Name==null && m_TempLine.from_Name==null)
-            {
-                m_TempLine.UIPath.Visibility = Visibility.Collapsed;
-                return;
-            }
-            m_TempLine.UIPath.Visibility = Visibility.Visible;
-            EntityLine_Model t_line = new EntityLine_Model();
-            t_line.from_index = m_TempLine.from_index;
-            t_line.to_index = m_TempLine.to_index;
-            if (m_TempLine.from_Name==null && m_TempLine.to_Name!=null)
-            {
-                var frame_to = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.to_Name];
-                t_line.from_point.X = (int)e.GetCurrentPoint(C_MAINGRID).Position.X;
-                t_line.from_point.Y = (int)e.GetCurrentPoint(C_MAINGRID).Position.Y;
-                t_line.to_point = new System.Drawing.Point((int)frame_to.UIEntity.Translation.X, (int)frame_to.UIEntity.Translation.Y);
-
-                t_line.to_point.Y += EntityFrame_Model.SlotIndexToY(t_line.to_index);
-                t_line.to_point.X += 300 * 0 + 8;
-            }
-            if (m_TempLine.to_Name == null && m_TempLine.from_Name != null)
-            {
-                var frame_from = (EntityFrame_Model)m_Elements.m_Frames[m_TempLine.from_Name];
-                t_line.to_point.X = (int)e.GetCurrentPoint(C_MAINGRID).Position.X;
-                t_line.to_point.Y = (int)e.GetCurrentPoint(C_MAINGRID).Position.Y;
-                t_line.from_point = new System.Drawing.Point((int)frame_from.UIEntity.Translation.X, (int)frame_from.UIEntity.Translation.Y);
-
-                t_line.from_point.Y += EntityFrame_Model.SlotIndexToY(t_line.from_index);
-                t_line.from_point.X += 300 * 1 - 8;
-            }
-
-            
-
-
-
-
-            var pathGeometry1 = new PathGeometry();
-            var pathFigureCollection1 = new PathFigureCollection();
-            var pathFigure1 = new PathFigure();
-            pathFigure1.IsClosed = false;
-            pathFigure1.StartPoint = new Windows.Foundation.Point(t_line.from_point.X, t_line.from_point.Y);
-            pathFigureCollection1.Add(pathFigure1);
-            pathGeometry1.Figures = pathFigureCollection1;
-
-            var pathSegmentCollection1 = new PathSegmentCollection();
-            var pathSegment1 = new BezierSegment();
-            pathSegment1.Point1 = new Point(t_line.from_point.X + 100, t_line.from_point.Y);
-            pathSegment1.Point2 = new Point(t_line.to_point.X - 100, t_line.to_point.Y);
-            pathSegment1.Point3 = new Point(t_line.to_point.X, t_line.to_point.Y);
-            pathSegmentCollection1.Add(pathSegment1);
-
-            pathFigure1.Segments = pathSegmentCollection1;
-
-            
-            m_TempLine.UIPath.Data = pathGeometry1;
-
+             LoadPresets();
         }
 
-        private void C_MAINGRID_PointerPressed(object sender, PointerRoutedEventArgs e)
+        private void C_BUTTONSAVEPRESET_Click(object sender, RoutedEventArgs e)
         {
-            m_TempLine.from_Name = null;
-            m_TempLine.to_Name = null;
-            m_TempLine.UIPath.Visibility = Visibility.Collapsed;
+            SavePresets();
         }
     }
 }

@@ -20,9 +20,9 @@ namespace EvendlerEditor
     public sealed partial class EntityFrame : UserControl
     {
         public delegate void SlotEventHandler(object sender, dynamic e);
-        public event SlotEventHandler EntityMoved;
-        public event SlotEventHandler SlotClicked;
-        public event SlotEventHandler Deletelicked;
+        public event SlotEventHandler e_EntityMoved;
+        public event SlotEventHandler e_SlotClicked;
+        public event SlotEventHandler e_Deletelicked;
         public event SlotEventHandler e_PointerEnter;
         public event SlotEventHandler e_PointerExit;
         public event SlotEventHandler e_RefreshFrame;
@@ -64,20 +64,20 @@ namespace EvendlerEditor
                 t.X = (float)(e.GetCurrentPoint(this).Position.X - m_OldPoint.X + m_OldTranslation.X);
                 t.Y = (float)(e.GetCurrentPoint(this).Position.Y - m_OldPoint.Y + m_OldTranslation.Y);
                 t.Z = 256;
-                //m_OldPoint = e.GetCurrentPoint(this).Position;
+               
                 m_OldTranslation =t;
+
                 this.Translation = t;
 
-
-
+                //invoke event e_EntityMoved
                 var pos = e.GetCurrentPoint(this).Position;
                 pos.X = this.Translation.X;
                 pos.Y = this.Translation.Y;
                 dynamic d = new System.Dynamic.ExpandoObject();
                 d.ENTITYNAME = m_Name;
-                if (EntityMoved!=null)
+                if (e_EntityMoved!=null)
                 {
-                    EntityMoved.Invoke(this, d);
+                    e_EntityMoved.Invoke(this, d);
 
                 }
             }
@@ -138,6 +138,7 @@ namespace EvendlerEditor
             dynamic d=new System.Dynamic.ExpandoObject();
             d.TYPE = "SLOTCLICKED";
             d.ENTITYNAME = m_Name;
+            d.SLOTNAME = button.Content.ToString();
             if(slot_i!=-1)
             {
                 d.TYPE = "INPUTSLOT";
@@ -149,9 +150,9 @@ namespace EvendlerEditor
                 d.SLOT = slot_o;
             }
 
-            if (SlotClicked != null)
+            if (e_SlotClicked != null)
             {
-                this.SlotClicked.Invoke(this, d);
+                this.e_SlotClicked.Invoke(this, d);
             }
 
 
@@ -163,9 +164,9 @@ namespace EvendlerEditor
             d.TYPE = "DETELECLICKED";
             d.ENTITYNAME = m_Name;
 
-            if ( Deletelicked!= null)
+            if ( e_Deletelicked!= null)
             {
-                this.Deletelicked.Invoke(this, d);
+                this.e_Deletelicked.Invoke(this, d);
             }
         }
 
