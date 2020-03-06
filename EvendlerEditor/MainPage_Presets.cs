@@ -16,6 +16,41 @@ using Windows.UI.Xaml.Navigation;
 
 namespace EvendlerEditor
 {
+    public class PresetItem : IComparable, IEqualityComparer<PresetItem>
+    {
+        public String Label = "";
+        public String Code = "";
+
+
+
+        public int CompareTo(object obj)
+        {
+            PresetItem o = (PresetItem)obj;
+            if (o.Code.Equals(this.Code) && o.Label.Equals(this.Label))
+            {
+                return 0;
+            }
+            else
+            {
+                return this.Code.CompareTo(o.Code);
+            }
+
+        }
+
+        public bool Equals(PresetItem x, PresetItem y)
+        {
+            if (x.Code.Equals(y.Code) && x.Label.Equals(y.Label))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public int GetHashCode(PresetItem obj)
+        {
+            return this.Code.GetHashCode();
+        }
+    }
     public sealed partial class MainPage : Page
     {
 
@@ -85,6 +120,44 @@ namespace EvendlerEditor
                 }
             }
         }
-        
+
+        public System.Collections.Generic.List<PresetItem> m_Presets = new System.Collections.Generic.List<PresetItem>();
+
+        private void C_BUTTONADDPRESET_Click(object sender, RoutedEventArgs e)
+        {
+            String code = C_TEXTADDPRESET.Text;
+            int i = code.IndexOf("\r");
+            String Label = code.Substring(0, i);
+            if (Label.Contains("@"))
+            {
+                Label = Label.Substring(1);
+            }
+            C_PRESETLIST.ItemsSource = null;
+            m_Presets.Add(new PresetItem()
+            {
+                Label = Label,
+                Code = code,
+            });
+            C_PRESETLIST.ItemsSource = m_Presets;
+        }
+
+        private void C_PRESETLIST_BUTTON_DELETE_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            PresetItem pi = (PresetItem)button.DataContext;
+            C_PRESETLIST.ItemsSource = null;
+            m_Presets.Remove(pi);
+            C_PRESETLIST.ItemsSource = m_Presets;
+        }
+
+        private async void C_BUTTONLOADPRESET_Click(object sender, RoutedEventArgs e)
+        {
+            LoadPresets();
+        }
+
+        private void C_BUTTONSAVEPRESET_Click(object sender, RoutedEventArgs e)
+        {
+            SavePresets();
+        }
     }
 }

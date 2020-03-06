@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace EvendlerEditor
 {
+  
     public sealed partial class MainPage : Page
     {
         private void C_BUTTON_PANEL_SWITCH_Click(object sender, RoutedEventArgs e)

@@ -23,7 +23,7 @@
         CornerRadius="8,8,8,8" Margin="4,4,4,4" BorderThickness="2,2,2,2" 
           >
         <Grid.Background>
-            <AcrylicBrush TintColor="Transparent"/>
+            <AcrylicBrush TintColor="#CCFFFFFF"/>
         </Grid.Background>
         <Grid.BorderBrush>
             <AcrylicBrush TintColor="#66000000"/>
@@ -46,7 +46,12 @@
 
                      Margin="0,4,0,4" VerticalAlignment="Center" HorizontalAlignment="Stretch" CornerRadius="4,4,4,4" MinWidth="80" FocusVisualPrimaryBrush="{x:Null}" Orientation="Vertical"
         >
-            <TextBlock x:Name="C_LABEL" Text="Main" TextWrapping="Wrap" TextAlignment="Center" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" FocusVisualPrimaryBrush="{x:Null}" LineStackingStrategy="BlockLineHeight"/>
+            <TextBlock x:Name="C_LABEL" Text="Main" TextWrapping="Wrap" TextAlignment="Center" 
+                       FontWeight="Bold" FontSize="11"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" 
+                       FocusVisualPrimaryBrush="Black" 
+                       Foreground="Black"
+                       LineStackingStrategy="BlockLineHeight"/>
         </StackPanel>
         <StackPanel x:Name="C_INPUTSTACK"  Grid.Row="1" FocusVisualPrimaryBrush="#FFF60000" Grid.ColumnSpan="2" Margin="0,4,4,4" CornerRadius="4,4,4,4"/>
         <StackPanel x:Name="C_OUTPUTSTACK" Grid.Row="1" FocusVisualPrimaryBrush="#FFF60000" Grid.Column="2" Grid.ColumnSpan="2" Margin="4,4,0,4" CornerRadius="4,4,4,4"/>
@@ -58,7 +63,7 @@
         <TextBox x:Name="C_CODEBOX" Grid.Row="1" Grid.ColumnSpan="4" 
                  Grid.RowSpan="3" Background="White" Visibility="Collapsed"
                  Margin="4,4,4,4" InputScope="Default"
-                 AcceptsReturn="True" Text=""
+                 AcceptsReturn="True" Text=""                
                  Canvas.ZIndex="2" BorderThickness="0,0,0,0" CornerRadius="4,4,4,4"
         ></TextBox>
     </Grid>

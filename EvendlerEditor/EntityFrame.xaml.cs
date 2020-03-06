@@ -45,7 +45,7 @@ namespace EvendlerEditor
         private void EntityFrameControl_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
             this.Translation =new System.Numerics.Vector3(this.Translation.X, this.Translation.Y ,256);
-            Canvas.SetZIndex(this, 256);
+            Canvas.SetZIndex(this, 3);
             dynamic d = new System.Dynamic.ExpandoObject();
             d.ENTITYNAME = m_Name;
             if (e_PointerEnter != null)

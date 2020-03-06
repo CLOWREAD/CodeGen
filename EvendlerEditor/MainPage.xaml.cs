@@ -21,44 +21,9 @@ namespace EvendlerEditor
     /// <summary>
     /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
-    public class PresetItem :IComparable, IEqualityComparer<PresetItem>
-    {
-        public String Label="";
-        public String Code="";
-
-   
-
-        public int CompareTo(object obj)
-        {
-            PresetItem o = (PresetItem)obj;
-            if(o.Code.Equals(this.Code) && o.Label.Equals(this.Label))
-            {
-                return 0;
-            }
-            else
-            {
-                return this.Code.CompareTo(o.Code);
-            }
-
-        }
-
-        public bool Equals(PresetItem x, PresetItem y)
-        {
-            if (x.Code.Equals(y.Code) && x.Label.Equals(y.Label))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public int GetHashCode(PresetItem obj)
-        {
-            return this.Code.GetHashCode();
-        }
-    }
+    
     public sealed partial class MainPage : Page
     {
-        public System.Collections.Generic.List<PresetItem> m_Presets = new System.Collections.Generic.List<PresetItem>();
         /// <summary>
         ///  Record Lines and Frames dictionary
         /// </summary>
@@ -67,20 +32,53 @@ namespace EvendlerEditor
         /// Record Line that is not complete
         /// </summary>
         public EntityLine_Model m_TempLine = new EntityLine_Model() { from_Name=null,to_Name=null};
+
+        DispatcherTimer m_Timer;
         public MainPage()
         {
             this.InitializeComponent();
+            var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+            coreTitleBar.LayoutMetricsChanged += CoreTitleBar_LayoutMetricsChanged;
+            Window.Current.SetTitleBar(C_TITLEBAR);
+
             m_TempLine.UIPath = new Windows.UI.Xaml.Shapes.Path();
             m_TempLine.UIPath.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 204, 204, 255));
-            m_TempLine.UIPath.Stroke = new SolidColorBrush(Windows.UI.Colors.Black);
+            m_TempLine.UIPath.Stroke = new SolidColorBrush(Windows.UI.Colors.LightGreen);
             m_TempLine.UIPath.StrokeThickness = 4;
+            Canvas.SetZIndex(m_TempLine.UIPath, 5);
             C_MAINGRID.Children.Add(m_TempLine.UIPath);
             m_Presets.Add(new PresetItem() { Label = "EMPTY",Code="" });
             C_PRESETLIST.ItemsSource = m_Presets;
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
+
+            //////////////////////////////////////
+            m_Timer = new DispatcherTimer();
+            m_Timer.Interval = new TimeSpan(10000);
+            m_Timer.Tick += M_Timer_Tick;
+            m_Timer.Start();
         }
 
-        private void EntityFrame_FrameMove(object sender, dynamic e)
+        private void M_Timer_Tick(object sender, object e)
+        {
+         
+            foreach (object t_line_key in m_Elements.m_Lines.Keys)
+            {
+                
+                EntityLine_Model line = (EntityLine_Model)m_Elements.m_Lines[(String)t_line_key];
+                line.UIPath.StrokeDashOffset -= 0.2;
+                if (line.UIPath.StrokeDashOffset < 0) 
+                {
+                    line.UIPath.StrokeDashOffset = 6.0;
+                }
+
+            }
+        }
+        private void CoreTitleBar_LayoutMetricsChanged(Windows.ApplicationModel.Core.CoreApplicationViewTitleBar sender, object args)
+        {
+            C_TITLEBAR.Height = sender.Height;
+        }
+        private void OnEntityFrameMove(object sender, dynamic e)
         {
 
             String e_name= e.ENTITYNAME;
@@ -229,7 +227,12 @@ namespace EvendlerEditor
             
 
         }
-       
+
+        /// <summary>
+        /// delete lines which links this frame 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void OnEntityRefresh(object sender, dynamic e)
         {
             String e_name = e.ENTITYNAME;
@@ -244,6 +247,7 @@ namespace EvendlerEditor
             foreach (String t_line_key in key_list)
             {
                 EntityLine_Model line = (EntityLine_Model)m_Elements.m_Lines[t_line_key];
+                if (line == null) continue;
                 DeleteLine(line.Name);
             }
             //this.C_MAINGRID.Children.Remove(entity.UIEntity);
@@ -337,12 +341,24 @@ namespace EvendlerEditor
 
             pathFigure1.Segments = pathSegmentCollection1;
 
+            DoubleCollection t_path_dash = new DoubleCollection();
+            t_path_dash.Add(4);
+            t_path_dash.Add(2);
+
+
+
             t_path.Name = line.Name;
             t_path.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 204, 204, 255));
             t_path.Stroke = new SolidColorBrush(Windows.UI.Colors.Black);
+            t_path.StrokeStartLineCap = PenLineCap.Round;
+            t_path.StrokeDashOffset = 40;
+            t_path.StrokeDashArray = t_path_dash;
+            t_path.StrokeDashCap = PenLineCap.Round;
             t_path.StrokeThickness = 4;
+            t_path.Opacity = 0.5;
             t_path.Data = pathGeometry1;
             line.UIPath = t_path;
+            Canvas.SetZIndex(line.UIPath, 5);
             m_Elements.m_Lines[line.Name] =line;
 
             frame_from.m_Lines[from_slot_name]= line.Name;
@@ -376,7 +392,7 @@ namespace EvendlerEditor
 
             entity.UIEntity.m_Name = entity.Name;
             entity.UIEntity.e_SlotClicked += this.OnEntitySlotClicked;
-            entity.UIEntity.e_EntityMoved += this.EntityFrame_FrameMove;
+            entity.UIEntity.e_EntityMoved += this.OnEntityFrameMove;
             entity.UIEntity.e_Deletelicked += this.OnEntityDeleteClicked;
             entity.UIEntity.e_RefreshFrame += this.OnEntityRefresh;
             //entity.UIEntity.e_PointerExit += this.OnEntityPointerExit;
@@ -401,7 +417,11 @@ namespace EvendlerEditor
                     entity.UIEntity.Decode_Talker();
                 }
             }
-
+            double center_y=(C_MAINSCROLLVIEWER.VerticalOffset + C_MAINSCROLLVIEWER.ViewportHeight / 2) /C_MAINSCROLLVIEWER.ZoomFactor;
+            double center_x = (C_MAINSCROLLVIEWER.HorizontalOffset + C_MAINSCROLLVIEWER.ViewportWidth / 2 )/C_MAINSCROLLVIEWER.ZoomFactor;
+            center_x -= 150;
+            center_y -= 200;
+            entity.UIEntity.Translation = new System.Numerics.Vector3((float)center_x, (float)center_y, 1);
         }
         public String Serialize()
         {
@@ -608,41 +628,5 @@ namespace EvendlerEditor
             }
         }
 
-        private void C_BUTTONADDPRESET_Click(object sender, RoutedEventArgs e)
-        {
-            String code = C_TEXTADDPRESET.Text;
-            int i = code.IndexOf("\r");
-            String Label = code.Substring(0, i);
-            if (Label.Contains("@"))
-            {
-                Label = Label.Substring(1);
-            }
-            C_PRESETLIST.ItemsSource = null;
-            m_Presets.Add(new PresetItem()
-            {
-                Label = Label,
-                Code = code,
-            }) ;
-            C_PRESETLIST.ItemsSource = m_Presets;
-        }
-
-        private void C_PRESETLIST_BUTTON_DELETE_Click(object sender, RoutedEventArgs e)
-        {
-            Button button=(Button)sender;
-            PresetItem pi= (PresetItem)button.DataContext;
-            C_PRESETLIST.ItemsSource = null;
-            m_Presets.Remove(pi);
-            C_PRESETLIST.ItemsSource = m_Presets;
-        }
-
-        private async void C_BUTTONLOADPRESET_Click(object sender, RoutedEventArgs e)
-        {
-             LoadPresets();
-        }
-
-        private void C_BUTTONSAVEPRESET_Click(object sender, RoutedEventArgs e)
-        {
-            SavePresets();
-        }
     }
 }

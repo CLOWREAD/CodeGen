@@ -72,7 +72,7 @@ namespace EvendlerEditor
 
             String linked_name = "";
             String linked_slot = "";
-            if (l.from_Name.Equals(Name))
+            if (l.from_Name.Equals(Name) && l.from_SlotName.Equals(Slot))
             {
                 linked_name = l.to_Name;
                 linked_slot = l.to_SlotName;
@@ -138,7 +138,7 @@ namespace EvendlerEditor
                     String o_name = linkedframe.Name;
                     String o_slot = GetLinkedEntitySlot(f.Name, i_name);
                     String o_label = linkedframe.UIEntity.m_Label;
-                    String rep_str = String.Format(" var {0} = ((dynamic)GLOBAL_OUTPUT[\"{1}\"]).{2};", i_name,o_label + "_" + o_name, o_slot);
+                    String rep_str = String.Format(" object {0} = null; if(GLOBAL_OUTPUT.ContainsKey(\"{1}\")){{ try{{ {0}=((dynamic)GLOBAL_OUTPUT[\"{1}\"]).{2}; }}catch(Exception e){{}}   }}", i_name,o_label + "_" + o_name, o_slot);
                     t_res = t_res.Replace("@" + i_name, rep_str);
                     
 

@@ -1,0 +1,7 @@
+﻿"C:\Users\clow_\source\repos\EvendlerEditor\obj\x64\Release\ilc\in\EvendlerEditor.exe"
+/Lib:"C:\Users\clow_\source\repos\EvendlerEditor\obj\x64\Release\ilc\in"
+/Lib:"C:\Program Files (x86)\Microsoft SDKs\UWPNuGetPackages\runtime.win10-x64.microsoft.net.native.compiler\2.2.7-rel-27913-00\tools\x64\ilc\lib\Private"
+/WinMD:"C:\Users\clow_\source\repos\EvendlerEditor\obj\x64\Release\ilc\in\WinMetadata\Windows.winmd"
+/VSTelemetrySessionSettings:"{"IsOptedIn":true,"HostName":"Dev14","AppInsightsInstrumentationKey":"f144292e-e3b2-4011-ac90-20e5c03fbce5","AsimovInstrumentationKey":"AIF-312cbd79-9dbb-4c48-a7da-3cc2a931cb70","AppId":1001,"UserId":"39274c1a-238b-46e8-87eb-a308346c714b","Id":"7132aba9-6a08-4cb9-b227-d744e592e7df","ProcessStartTime":637190795741402518}"
+/RdXmlPath:"C:\Program Files (x86)\Microsoft SDKs\UWPNuGetPackages\microsoft.net.native.compiler\2.2.7-rel-27913-00\tools\LibraryXML"
+/RunOnlyPreDR
